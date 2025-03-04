@@ -2,12 +2,6 @@
 
 EventEase is a simple event management API built using Node.js and Express. It allows users to manage events, organizers, and assignments efficiently.
 
-
-## 🔹 Postman Collection  
-You can test all API requests using this Postman collection:  
-https://www.postman.com/flight-specialist-52013161/api-by-kg/collection/17gdr8f/eventease?action=share&creator=42711824
-
-
 ## 🚀 Features
 ### **Events Management:**
 - View all events
@@ -57,6 +51,12 @@ node index.js
 ```
 The API will be running at: `http://localhost:3000`
 
+## 🔹 Postman Collection  
+You can test all API requests using this Postman collection:   
+https://www.postman.com/flight-specialist-52013161/api-by-kg/collection/17gdr8f/eventease?action=share&creator=42711824
+
+**Note-** To run the above postman collection you need to download Postman Desktop Agent:     
+https://www.postman.com/downloads/postman-agent/
 
 ## 📌 API Endpoints
 
