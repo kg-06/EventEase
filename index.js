@@ -1,8 +1,13 @@
 const express= require('express');
+const morgan= require('morgan');
+require('dotenv').config();
+const port= process.env.PORT || 3000;
 const app=express();
-const PORT=3000;
+
 
 app.use(express.json());
+app.use(express.urlencoded({extended:true}));
+app.use(morgan('dev'));
 
 const {router:eventsRoutes}=require('./routes/events');
 const {router:userRoutes}=require('./routes/users');
@@ -16,7 +21,7 @@ app.get('/',(req,res)=>{
     res.send("EventEase is running!");
 });
 
-app.listen(PORT,()=>{
+app.listen(port,()=>{
     console.log(`Server is running on http://localhost:${PORT}`);
 });
 
