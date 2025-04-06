@@ -6,11 +6,12 @@ let assignments=[];
 
 const usersModule = require('./users');
 const eventsModule = require('./events');
+const AppError=require('../utilis/AppError');
 
-router.post('/',(req,res)=>{
+router.post('/',(req,res,next)=>{
     const{userId,eventId}=req.query;
     if(!userId||!eventId){
-        return res.status(400).json({message:"Missing userId or eventId !"});
+        return next(new AppError("Missing userId or eventId !",400));
     }
     
     const users = usersModule.getUsers();
@@ -18,16 +19,16 @@ router.post('/',(req,res)=>{
 
     const userExists=users.some(user=>user.id==userId);
     if(!userExists){
-        return res.status(400).json({message:"User ID does not exist!!"});
+        return next(new AppError("User ID does not exist!!",400));
     }
     const eventExists=events.some(event=>event.id==eventId);
     if(!eventExists){
-        return res.status(400).json({message:"Event ID does not exist!!"});
+        return next(new AppError("Event ID does not exist!!",400));
     }
 
     const existingAssignment=assignments.find(a=>a.userId==userId && a.eventId==eventId);
     if(existingAssignment){
-        return res.status(400).json({message:"Assignment already exists.."});
+        return next(new AppError("Assignment already exists..",400));
     }
 
     assignments.push({userId,eventId});
@@ -38,63 +39,63 @@ router.get('/',(req,res)=>{
     res.json(assignments);
 });
 
-router.get('/organizer/:userId',(req,res)=>{
+router.get('/organizer/:userId',(req,res,next)=>{
     const userId=req.params.userId;
     const assignedEvents=assignments.filter(a=>a.userId==userId);
 
     if(assignedEvents.length==0){
-        return res.status(404).json({message:"No events found for this organizer!"});
+        return next(new AppError("No events found for this organizer!",404));
     }
 
     res.json(assignedEvents);
 });
 
-router.get('/event/:eventId',(req,res)=>{
+router.get('/event/:eventId',(req,res,next)=>{
     const eventId=req.params.eventId;
     const assignedOrganizers=assignments.filter(a=>a.eventId==eventId);
 
     if(assignedOrganizers.length==0){
-        return res.status(404).json({message:"No Organizers found for this event!"});
+        return next(new AppError("No Organizers found for this event!",404));
     }
     res.json(assignedOrganizers);
 });
 
-router.delete('/organizer/:userId',(req,res)=>{
+router.delete('/organizer/:userId',(req,res,next)=>{
     const userId=req.params.userId;
     const intialLength=assignments.length;
     assignments=assignments.filter(a=>a.userId!=userId);
 
     if(assignments.length===intialLength){
-        return res.status(404).json({message:"No assignments found for this user!"});
+        return next(new AppError("No assignments found for this user!",404));
     }
 
     res.json({message:"All assignments for this user is deleted",assignments});
 
 });
 
-router.delete('/event/:eventId',(req,res)=>{
+router.delete('/event/:eventId',(req,res,next)=>{
     const eventId=req.params.eventId;
     const intialLength=assignments.length;
     assignments=assignments.filter(a=>a.eventId!=eventId);
 
     if(assignments.length==intialLength){
-        return res.status(404).json({message:"No assignments found for this event!"});
+        return next(new AppError("No assignments found for this event!",404));
     }
 
     res.json({message:"All assignments for this event are deleted!",assignments});
 });
 
-router.delete('/',(req,res)=>{
+router.delete('/',(req,res,next)=>{
     const {userId,eventId}=req.query;
     if(!userId||!eventId){
-        return res.status(400).json({message:"Missing userId or eventId"});
+        return next(new AppError("Missing userId or eventId",400));
     }
 
     const intialLength=assignments.length;
     assignments=assignments.filter(a=>!(a.userId==userId && a.eventId==eventId));
 
     if(assignments.length==intialLength){
-        return res.status(404).json({message:"Assignment not found"});
+        return next(new AppError("Assignment not found",404));
     }
 
     res.json({message:"Assignment deleted",assignments});

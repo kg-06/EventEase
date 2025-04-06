@@ -19,3 +19,12 @@ app.get('/',(req,res)=>{
 app.listen(PORT,()=>{
     console.log(`Server is running on http://localhost:${PORT}`);
 });
+
+app.use((err,req,res,next) => {
+    console.error(err.stack);
+    res.status(err.status || 500).json({
+        success:false,
+        message: err.message || 'Something went wrong!',
+    });
+});
+
