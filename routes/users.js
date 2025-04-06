@@ -1,47 +1,84 @@
 const express=require('express');
 const router=express.Router();
 const AppError=require('../utilis/AppError');
+const User=require('../models/user');
 
-let users=[];
 
-router.get('/',(req,res)=>{
-    res.json(users);
+router.get('/',async(req,res,next)=>{
+  try{
+    const users=await User.find();
+    res.json({success:true,data:users});
+  }catch(err){
+    next(err);
+  }
 });
 
-router.get('/:id',(req,res,next)=>{
-    const user=users.find(u=>u.id==req.params.id);
-    user?res.json(user):next(new AppError("User not found!",404));
-});
-
-router.post('/',(req,res,next)=>{
-    const {id,name}=req.query;
-    if(!id ||!name){
-        return next(new AppError("Missing required fields!",400));
+router.get('/:id',async(req,res,next)=>{
+    try{
+        const user=await User.findOne({id:req.params.id});
+        if(!user)return next(new AppError("User not found",404));
+        res.json({success:true,data:user});
+    }catch(err){
+        next(err);
     }
-    const existingUser=users.find(u=>u.id==id);
-    if(existingUser){
-        return next(new AppError("User already exist on this id!",400));
+    
+});
+
+router.post('/', async (req, res, next) => {
+    try {
+        const { id, name, email } = req.body;
+        if (!id || !name || !email) {
+            return next(new AppError("Missing required fields!", 400));
+        }
+
+        const existingUser = await User.findOne({ id });
+        if (existingUser) {
+            return next(new AppError("User already exists with this ID!", 400));
+        }
+
+        const newUser = new User({ id, name, email });
+        await newUser.save();
+
+        res.status(201).json({ message: "User added", user: newUser });
+    } catch (err) {
+        next(err);
     }
-    users.push({id,name});
-    res.json({message: "User added",users});
 });
 
-router.put('/:id',(req,res)=>{
-    let user=users.find(u=>u.id==req.params.id);
-    if(!user)return next(new AppError("User not found",404));
-    const{name}=req.query;
 
-    user.name=name;
-    res.json({message:"User updated",user});
+router.put('/:id', async (req, res, next) => {
+    try {
+        const { name, email } = req.body;
+        const user = await User.findOne({ id: req.params.id });
+
+        if (!user) {
+            return next(new AppError("User not found", 404));
+        }
+
+        if (name) user.name = name;
+        if (email) user.email = email;
+        await user.save();
+
+        res.json({ message: "User updated", user });
+    } catch (err) {
+        next(err);
+    }
 });
 
-router.delete('/:id',(req,res)=>{
-    let user=users.find(u=>u.id==req.params.id);
-    if(!user)return next(new AppError("User not found",404));
-    users=users.filter(u=>u.id!=req.params.id);
-    res.json({message:"User deleted",users});
+router.delete('/:id', async (req, res, next) => {
+    try {
+        const deletedUser = await User.findOneAndDelete({ id: req.params.id });
+
+        if (!deletedUser) {
+            return next(new AppError("User not found", 404));
+        }
+
+        const users = await User.find();
+        res.json({ message: "User deleted", users });
+    } catch (err) {
+        next(err);
+    }
 });
 
-const getUsers = () => users;
-module.exports={router, getUsers};
 
+module.exports = router;

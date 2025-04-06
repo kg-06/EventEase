@@ -1,48 +1,79 @@
-const express=require('express');
-const router=express.Router();
-const AppError=require('../utilis/AppError');
+const express = require('express');
+const router = express.Router();
+const AppError = require('../utilis/AppError');
+const Event = require('../models/event'); 
 
-let events=[];
 
-router.get('/',(req,res)=>{
-    res.json(events);
-});
-
-router.get('/:id',(req,res,next)=>{
-    const event=events.find(e=>e.id==req.params.id);
-    event?res.json(event):next(new AppError("Event not found",404));
-});
-
-router.post('/',(req,res,next)=>{
-    const{id,name,date}=req.query;
-    if(!id||!name||!date){
-        return next(new AppError("Missing required fields",400));
+router.get('/', async (req, res, next) => {
+    try {
+        const events = await Event.find();
+        res.json({ success: true, data: events });
+    } catch (err) {
+        next(err);
     }
-    const existingEvent=events.find(e=>e.id==id);
-    if(existingEvent){
-        return next(new AppError("Event already exist at this id!",400));
+});
+
+
+router.get('/:id', async (req, res, next) => {
+    try {
+        const event = await Event.findOne({ id: req.params.id });
+        if (!event) return next(new AppError("Event not found", 404));
+        res.json({ success: true, data: event });
+    } catch (err) {
+        next(err);
     }
-    events.push({id,name,date});
-    res.json({message:"Event added",events});
 });
 
-router.put('/:id',(req,res,next)=>{
-    let event=events.find(e=>e.id==req.params.id);
-    if(!event)return next(new AppError("Event not found",404));
 
-    const {name,date}=req.query;
-    if(name) event.name=name;
-    if(date) event.date=date;
+router.post('/', async (req, res, next) => {
+    try {
+        const { id, name, date } = req.body;
+        if (!id || !name || !date) {
+            return next(new AppError("Missing required fields", 400));
+        }
 
-    res.json({message:"Event updated!",event});
+        const existingEvent = await Event.findOne({ id });
+        if (existingEvent) {
+            return next(new AppError("Event already exists at this ID!", 400));
+        }
+
+        const newEvent = new Event({ id, name, date });
+        await newEvent.save();
+        res.status(201).json({ message: "Event added", event: newEvent });
+    } catch (err) {
+        next(err);
+    }
 });
 
-router.delete('/:id',(req,res,next)=>{
-    let event=events.find(e=>e.id==req.params.id);
-    if(!event)return next(new AppError("Event not found",404));
-    events=events.filter(e=>e.id!=req.params.id);
-    res.json({message:"Event deleted",events});
+
+router.put('/:id', async (req, res, next) => {
+    try {
+        const { name, date } = req.body;
+        const event = await Event.findOne({ id: req.params.id });
+
+        if (!event) return next(new AppError("Event not found", 404));
+
+        if (name) event.name = name;
+        if (date) event.date = date;
+        await event.save();
+
+        res.json({ message: "Event updated!", event });
+    } catch (err) {
+        next(err);
+    }
 });
 
-const getEvents = () => events;
-module.exports={router,getEvents};
+
+router.delete('/:id', async (req, res, next) => {
+    try {
+        const deletedEvent = await Event.findOneAndDelete({ id: req.params.id });
+        if (!deletedEvent) return next(new AppError("Event not found", 404));
+
+        const events = await Event.find();
+        res.json({ message: "Event deleted", data: events });
+    } catch (err) {
+        next(err);
+    }
+});
+
+module.exports = router;

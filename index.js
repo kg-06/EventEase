@@ -3,14 +3,25 @@ const morgan= require('morgan');
 require('dotenv').config();
 const port= process.env.PORT || 3000;
 const app=express();
+const mongoose=require('mongoose');
+
+mongoose.connect(process.env.MONGO_URL,{
+    useNewUrlParser:true,
+    useUnifiedTopology:true
+})
+.then(()=>console.log('MongoDB connected'))
+.catch(err =>{
+    console.error('MongoDB connection error:',err);
+    process.exit(1);
+});
 
 
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 app.use(morgan('dev'));
 
-const {router:eventsRoutes}=require('./routes/events');
-const {router:userRoutes}=require('./routes/users');
+const eventsRoutes=require('./routes/events');
+const userRoutes=require('./routes/users');
 const assignmentRoutes=require('./routes/assignments');
 
 app.use('/events', eventsRoutes);
@@ -22,7 +33,7 @@ app.get('/',(req,res)=>{
 });
 
 app.listen(port,()=>{
-    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`Server is running on http://localhost:${port}`);
 });
 
 app.use((err,req,res,next) => {
