@@ -14,15 +14,8 @@ const eventSchema = new mongoose.Schema({
     type: String,
     required: true
   }
-},{
-    versionKey: false, 
-    toJSON: {
-      transform: function (doc, ret) {
-        delete ret._id;
-    }
-    
-}    
-},{
+},   
+{
     versionKey: false, 
     toJSON: {
       transform: function (doc, ret) {
