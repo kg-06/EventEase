@@ -19,6 +19,7 @@ mongoose.connect(process.env.MONGO_URL,{
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 app.use(morgan('dev'));
+const AppError = require('./utilis/AppError');
 
 const eventsRoutes=require('./routes/events');
 const userRoutes=require('./routes/users');
@@ -35,6 +36,10 @@ app.get('/',(req,res)=>{
 app.listen(port,()=>{
     console.log(`Server is running on http://localhost:${port}`);
 });
+
+app.use((req,res)=>{
+    return next(new AppError("Route Not Found",404));
+})
 
 app.use((err,req,res,next) => {
     console.error(err.stack);
