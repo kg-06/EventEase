@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>EventEase Dashboard</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="js/main.js" defer></script>
+</head>
+<body>
+  <header>
+    <h1>EventEase Dashboard</h1>
+  </header>
+
+  <nav>
+    <a href="index.html">Dashboard</a>
+    <a href="organizers.html">Organizers</a>
+    <a href="events.html">Events</a>
+    <a href="assignments.html">Assignments</a>
+  </nav>
+
+  <div class="container">
+    <section>
+      <h2>All Organizers</h2>
+      <table id="user-table">
+        <thead>
+          <tr>
+            <th>User ID</th>
+            <th>Name</th>
+            <th>Email</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>All Events</h2>
+      <table id="event-table">
+        <thead>
+          <tr>
+            <th>Event ID</th>
+            <th>Name</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>All Assignments</h2>
+      <table id="assignment-table">
+        <thead>
+          <tr>
+            <th>User ID</th>
+            <th>Event ID</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </div>
+</body>
+</html>

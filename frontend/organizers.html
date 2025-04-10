@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Organizer Panel</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header>
+    <h1>Organizer Management</h1>
+  </header>
+
+  <nav>
+    <a href="index.html">Dashboard</a>
+    <a href="organizers.html">Organizers</a>
+    <a href="events.html">Events</a>
+    <a href="assignments.html">Assignments</a>
+  </nav>
+
+    <div class="cards-grid">
+      <div class="card" onclick="openPopup('add-user-popup')">➕ Add Organizer</div>
+      <div class="card" onclick="openPopup('update-user-popup')">✏️ Update Organizer</div>
+      <div class="card" onclick="openPopup('get-user-popup')">🔍 Get Organizer</div>
+      <div class="card" onclick="openPopup('delete-user-popup')">❌ Delete Organizer</div>
+    </div>
+
+  <div class="popup" id="add-user-popup">
+    <div class="popup-content">
+      <span class="close-btn" onclick="closePopup('add-user-popup')">&times;</span>
+      <h2>Add Organizer</h2>
+      <form id="add-user-form">
+        <input type="text" name="id" placeholder="ID" required />
+        <input type="text" name="name" placeholder="Name" required />
+        <input type="email" name="email" placeholder="Email" required />
+        <button type="submit">Add</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="popup" id="update-user-popup">
+    <div class="popup-content">
+      <span class="close-btn" onclick="closePopup('update-user-popup')">&times;</span>
+      <h2>Update Organizer</h2>
+      <form id="update-user-form">
+        <input type="text" name="id" placeholder="ID" required />
+        <input type="text" name="name" placeholder="New Name" />
+        <input type="email" name="email" placeholder="New Email" />
+        <button type="submit">Update</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="popup" id="get-user-popup">
+    <div class="popup-content">
+      <span class="close-btn" onclick="closePopup('get-user-popup')">&times;</span>
+      <h2>Get Organizer by ID</h2>
+      <form id="get-user-form">
+        <input type="text" name="id" placeholder="ID" required />
+        <button type="submit">Get</button>
+      </form>
+      <pre id="user-result"></pre>
+    </div>
+  </div>
+
+  <div class="popup" id="delete-user-popup">
+    <div class="popup-content">
+      <span class="close-btn" onclick="closePopup('delete-user-popup')">&times;</span>
+      <h2>Delete Organizer</h2>
+      <form id="delete-user-form">
+        <input type="text" name="id" placeholder="ID to delete" required />
+        <button type="submit">Delete</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const openPopup = (id) => document.getElementById(id).classList.add("show");
+    const closePopup = (id) => document.getElementById(id).classList.remove("show");
+
+    document.getElementById("add-user-form").onsubmit = async (e) => {
+      e.preventDefault();
+      const { id, name, email } = e.target;
+      const res = await fetch("http://localhost:3000/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: id.value, name: name.value, email: email.value }),
+      });
+      const result = await res.json();
+      res.ok ? showToast("User added!", "success") : showToast(result.message, "error");
+      e.target.reset();
+      closePopup("add-user-popup");
+    };
+
+    document.getElementById("update-user-form").onsubmit = async (e) => {
+      e.preventDefault();
+      const { id, name, email } = e.target;
+      const data = {};
+      if (name.value) data.name = name.value;
+      if (email.value) data.email = email.value;
+
+      const res = await fetch(`http://localhost:3000/users/${id.value}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const result = await res.json();
+      res.ok ? showToast("User updated!", "success") : showToast(result.message, "error");
+      e.target.reset();
+      closePopup("update-user-popup");
+    };
+
+    document.getElementById("get-user-form").onsubmit = async (e) => {
+      e.preventDefault();
+      const id = e.target.id.value;
+      const res = await fetch(`http://localhost:3000/users/${id}`);
+      const result = await res.json();
+      const output = document.getElementById("user-result");
+      if (!res.ok) {
+        showToast(result.message, "error");
+        output.textContent = "";
+      } else {
+        output.textContent = JSON.stringify(result.data, null, 2);
+        showToast("User fetched!", "success");
+      }
+    };
+
+    document.getElementById("delete-user-form").onsubmit = async (e) => {
+      e.preventDefault();
+      const id = e.target.id.value;
+      const res = await fetch(`http://localhost:3000/users/${id}`, {
+        method: "DELETE",
+      });
+      const result = await res.json();
+      res.ok ? showToast("User deleted!", "success") : showToast(result.message, "error");
+      e.target.reset();
+      closePopup("delete-user-popup");
+    };
+
+    function showToast(message, type = "success") {
+      const toast = document.createElement("div");
+      toast.className = "custom-toast " + (type === "error" ? "error" : "");
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.classList.add("show"), 10);
+      setTimeout(() => {
+        toast.classList.remove("show");
+        setTimeout(() => document.body.removeChild(toast), 500);
+      }, 3000);
+    }
+  </script>
+</body>
+</html>

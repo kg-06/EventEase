@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Assignment Panel</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header>
+    <h1>Assignment Management</h1>
+  </header>
+
+  <nav>
+    <a href="index.html">Dashboard</a>
+    <a href="organizers.html">Organizers</a>
+    <a href="events.html">Events</a>
+    <a href="assignments.html">Assignments</a>
+  </nav>
+
+    <div class="cards-grid">
+      <div class="card" onclick="openPopup('assign-popup')">➕ Assign Organizer</div>
+      <div class="card" onclick="openPopup('get-by-user-popup')">🔍 Assignments by User</div>
+      <div class="card" onclick="openPopup('get-by-event-popup')">🔍 Assignments by Event</div>
+      <div class="card" onclick="openPopup('delete-assignment-popup')">❌ Delete Assignment(s)</div>
+    </div>
+
+  <div class="popup" id="assign-popup">
+    <div class="popup-content">
+      <span class="close-btn" onclick="closePopup('assign-popup')">&times;</span>
+      <h2>Assign Organizer to Event</h2>
+      <form id="assign-form">
+        <input type="text" name="userId" placeholder="User ID" required />
+        <input type="text" name="eventId" placeholder="Event ID" required />
+        <button type="submit">Assign</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="popup" id="get-by-user-popup">
+    <div class="popup-content">
+      <span class="close-btn" onclick="closePopup('get-by-user-popup')">&times;</span>
+      <h2>Assignments by User</h2>
+      <form id="get-user-assignments-form">
+        <input type="text" name="userId" placeholder="User ID" required />
+        <button type="submit">Get</button>
+      </form>
+      <pre id="user-assignments-result"></pre>
+    </div>
+  </div>
+
+  <div class="popup" id="get-by-event-popup">
+    <div class="popup-content">
+      <span class="close-btn" onclick="closePopup('get-by-event-popup')">&times;</span>
+      <h2>Assignments by Event</h2>
+      <form id="get-event-assignments-form">
+        <input type="text" name="eventId" placeholder="Event ID" required />
+        <button type="submit">Get</button>
+      </form>
+      <pre id="event-assignments-result"></pre>
+    </div>
+  </div>
+
+
+  <div class="popup" id="delete-assignment-popup">
+    <div class="popup-content">
+      <span class="close-btn" onclick="closePopup('delete-assignment-popup')">&times;</span>
+      <h2>Delete Assignment(s)</h2>
+      <form id="delete-assignment-form">
+        <input type="text" name="userId" placeholder="User ID (optional)" />
+        <input type="text" name="eventId" placeholder="Event ID (optional)" />
+        <button type="submit">Delete</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const openPopup = (id) => document.getElementById(id).classList.add("show");
+    const closePopup = (id) => document.getElementById(id).classList.remove("show");
+
+    document.getElementById("assign-form").onsubmit = async (e) => {
+      e.preventDefault();
+      const { userId, eventId } = e.target;
+      const res = await fetch("http://localhost:3000/assignments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: userId.value, eventId: eventId.value }),
+      });
+      const result = await res.json();
+      res.ok
+        ? showToast("Assignment added!", "success")
+        : showToast(result.message, "error");
+      e.target.reset();
+      closePopup("assign-popup");
+    };
+
+    document.getElementById("get-user-assignments-form").onsubmit = async (e) => {
+      e.preventDefault();
+      const userId = e.target.userId.value;
+      const res = await fetch(`http://localhost:3000/assignments/organizer/${userId}`);
+      const result = await res.json();
+      const output = document.getElementById("user-assignments-result");
+      if (!res.ok) {
+        showToast(result.message, "error");
+        output.textContent = "";
+      } else {
+        output.textContent = JSON.stringify(result, null, 2);
+        showToast("Assignments fetched!", "success");
+      }
+    };
+
+    document.getElementById("get-event-assignments-form").onsubmit = async (e) => {
+      e.preventDefault();
+      const eventId = e.target.eventId.value;
+      const res = await fetch(`http://localhost:3000/assignments/event/${eventId}`);
+      const result = await res.json();
+      const output = document.getElementById("event-assignments-result");
+      if (!res.ok) {
+        showToast(result.message, "error");
+        output.textContent = "";
+      } else {
+        output.textContent = JSON.stringify(result, null, 2);
+        showToast("Assignments fetched!", "success");
+      }
+    };
+
+    document.getElementById("delete-assignment-form").onsubmit = async (e) => {
+      e.preventDefault();
+      const { userId, eventId } = e.target;
+      const uid = userId.value.trim();
+      const eid = eventId.value.trim();
+
+      if (!uid && !eid) {
+        return showToast("Please enter at least user ID or event ID", "error");
+      }
+
+      let res;
+      if (uid && !eid) {
+        res = await fetch(`http://localhost:3000/assignments/organizer/${uid}`, { method: "DELETE" });
+      } else if (!uid && eid) {
+        res = await fetch(`http://localhost:3000/assignments/event/${eid}`, { method: "DELETE" });
+      } else {
+        res = await fetch(`http://localhost:3000/assignments`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: uid, eventId: eid }),
+        });
+      }
+
+      const result = await res.json();
+      res.ok
+        ? showToast(result.message, "success")
+        : showToast(result.message, "error");
+
+      e.target.reset();
+      closePopup("delete-assignment-popup");
+    };
+
+    function showToast(message, type = "success") {
+      const toast = document.createElement("div");
+      toast.className = "custom-toast " + (type === "error" ? "error" : "");
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.classList.add("show"), 10);
+      setTimeout(() => {
+        toast.classList.remove("show");
+        setTimeout(() => document.body.removeChild(toast), 500);
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
