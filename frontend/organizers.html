@@ -74,13 +74,15 @@
   </div>
 
   <script>
+    const API_URL = "https://eventease-jnht.onrender.com";
+    
     const openPopup = (id) => document.getElementById(id).classList.add("show");
     const closePopup = (id) => document.getElementById(id).classList.remove("show");
 
     document.getElementById("add-user-form").onsubmit = async (e) => {
       e.preventDefault();
       const { id, name, email } = e.target;
-      const res = await fetch("http://localhost:3000/users", {
+      const res = await fetch(`${API_URL}/users`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: id.value, name: name.value, email: email.value }),
@@ -98,7 +100,7 @@
       if (name.value) data.name = name.value;
       if (email.value) data.email = email.value;
 
-      const res = await fetch(`http://localhost:3000/users/${id.value}`, {
+      const res = await fetch(`${API_URL}/users/${id.value}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -112,7 +114,7 @@
     document.getElementById("get-user-form").onsubmit = async (e) => {
       e.preventDefault();
       const id = e.target.id.value;
-      const res = await fetch(`http://localhost:3000/users/${id}`);
+      const res = await fetch(`${API_URL}/users/${id}`);
       const result = await res.json();
       const output = document.getElementById("user-result");
       if (!res.ok) {
@@ -127,7 +129,7 @@
     document.getElementById("delete-user-form").onsubmit = async (e) => {
       e.preventDefault();
       const id = e.target.id.value;
-      const res = await fetch(`http://localhost:3000/users/${id}`, {
+      const res = await fetch(`${API_URL}/users/${id}`, {
         method: "DELETE",
       });
       const result = await res.json();

@@ -74,13 +74,15 @@
   </div>
 
   <script>
+    const API_URL = "https://eventease-jnht.onrender.com";
+    
     const openPopup = (id) => document.getElementById(id).classList.add("show");
     const closePopup = (id) => document.getElementById(id).classList.remove("show");
 
     document.getElementById("assign-form").onsubmit = async (e) => {
       e.preventDefault();
       const { userId, eventId } = e.target;
-      const res = await fetch("http://localhost:3000/assignments", {
+      const res = await fetch(`${API_URL}/assignments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: userId.value, eventId: eventId.value }),
@@ -96,7 +98,7 @@
     document.getElementById("get-user-assignments-form").onsubmit = async (e) => {
       e.preventDefault();
       const userId = e.target.userId.value;
-      const res = await fetch(`http://localhost:3000/assignments/organizer/${userId}`);
+      const res = await fetch(`${API_URL}/assignments/organizer/${userId}`);
       const result = await res.json();
       const output = document.getElementById("user-assignments-result");
       if (!res.ok) {
@@ -111,7 +113,7 @@
     document.getElementById("get-event-assignments-form").onsubmit = async (e) => {
       e.preventDefault();
       const eventId = e.target.eventId.value;
-      const res = await fetch(`http://localhost:3000/assignments/event/${eventId}`);
+      const res = await fetch(`${API_URL}/assignments/event/${eventId}`);
       const result = await res.json();
       const output = document.getElementById("event-assignments-result");
       if (!res.ok) {
@@ -135,11 +137,11 @@
 
       let res;
       if (uid && !eid) {
-        res = await fetch(`http://localhost:3000/assignments/organizer/${uid}`, { method: "DELETE" });
+        res = await fetch(`${API_URL}/assignments/organizer/${uid}`, { method: "DELETE" });
       } else if (!uid && eid) {
-        res = await fetch(`http://localhost:3000/assignments/event/${eid}`, { method: "DELETE" });
+        res = await fetch(`${API_URL}/assignments/event/${eid}`, { method: "DELETE" });
       } else {
-        res = await fetch(`http://localhost:3000/assignments`, {
+        res = await fetch(`${API_URL}/assignments`, {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ userId: uid, eventId: eid }),

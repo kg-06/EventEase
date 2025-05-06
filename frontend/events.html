@@ -74,6 +74,8 @@
   </div>
 
   <script>
+    const API_URL = "https://eventease-jnht.onrender.com";
+    
     const openPopup = (id) => document.getElementById(id).classList.add("show");
     const closePopup = (id) => document.getElementById(id).classList.remove("show");
 
@@ -82,7 +84,7 @@
       const { id, name, date } = e.target;
       const [year, month, day] = date.value.split("-");
       const formattedDate = `${day}-${month}-${year}`;
-      const res = await fetch("http://localhost:3000/events", {
+      const res = await fetch(`${API_URL}/events`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: id.value, name: name.value, date: formattedDate }),
@@ -104,7 +106,7 @@
         const [year, month, day] = date.value.split("-");
         data.date = `${day}-${month}-${year}`;
       }
-      const res = await fetch(`http://localhost:3000/events/${id.value}`, {
+      const res = await fetch(`${API_URL}/events/${id.value}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -120,7 +122,7 @@
     document.getElementById("get-event-form").onsubmit = async (e) => {
       e.preventDefault();
       const id = e.target.id.value;
-      const res = await fetch(`http://localhost:3000/events/${id}`);
+      const res = await fetch(`${API_URL}/events/${id}`);
       const result = await res.json();
       const output = document.getElementById("event-result");
       if (!res.ok) {
@@ -135,7 +137,7 @@
     document.getElementById("delete-event-form").onsubmit = async (e) => {
       e.preventDefault();
       const id = e.target.id.value;
-      const res = await fetch(`http://localhost:3000/events/${id}`, {
+      const res = await fetch(`${API_URL}/events/${id}`, {
         method: "DELETE",
       });
       const result = await res.json();
