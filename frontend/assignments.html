@@ -6,6 +6,13 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
+  <div class="bg-animation">
+    <div id="stars"></div>
+    <div id="stars2"></div>
+    <div id="stars3"></div>
+    <div id="stars4"></div>
+  </div>
+
   <header>
     <h1>Assignment Management</h1>
   </header>
@@ -17,12 +24,13 @@
     <a href="assignments.html">Assignments</a>
   </nav>
 
-    <div class="cards-grid">
-      <div class="card" onclick="openPopup('assign-popup')">➕ Assign Organizer</div>
-      <div class="card" onclick="openPopup('get-by-user-popup')">🔍 Assignments by User</div>
-      <div class="card" onclick="openPopup('get-by-event-popup')">🔍 Assignments by Event</div>
-      <div class="card" onclick="openPopup('delete-assignment-popup')">❌ Delete Assignment(s)</div>
-    </div>
+  <div class="cards-grid">
+    <div class="card" onclick="openPopup('assign-popup')">➕ Assign Organizer</div>
+    <div class="card" onclick="openPopup('get-by-user-popup')">🔍 Assignments by User</div>
+    <div class="card" onclick="openPopup('get-by-event-popup')">🔍 Assignments by Event</div>
+    <div class="card" onclick="openPopup('delete-assignment-popup')">❌ Delete Assignment(s)</div>
+  </div>
+
 
   <div class="popup" id="assign-popup">
     <div class="popup-content">
@@ -44,7 +52,7 @@
         <input type="text" name="userId" placeholder="User ID" required />
         <button type="submit">Get</button>
       </form>
-      <pre id="user-assignments-result"></pre>
+      <div id="user-assignments-result" class="assignment-result-cards"></div>
     </div>
   </div>
 
@@ -56,11 +64,10 @@
         <input type="text" name="eventId" placeholder="Event ID" required />
         <button type="submit">Get</button>
       </form>
-      <pre id="event-assignments-result"></pre>
+      <div id="event-assignments-result" class="assignment-result-cards"></div>
     </div>
   </div>
-
-
+  
   <div class="popup" id="delete-assignment-popup">
     <div class="popup-content">
       <span class="close-btn" onclick="closePopup('delete-assignment-popup')">&times;</span>
@@ -75,7 +82,7 @@
 
   <script>
     const API_URL = "https://eventease-jnht.onrender.com";
-    
+
     const openPopup = (id) => document.getElementById(id).classList.add("show");
     const closePopup = (id) => document.getElementById(id).classList.remove("show");
 
@@ -100,14 +107,25 @@
       const userId = e.target.userId.value;
       const res = await fetch(`${API_URL}/assignments/organizer/${userId}`);
       const result = await res.json();
-      const output = document.getElementById("user-assignments-result");
+      const container = document.getElementById("user-assignments-result");
+      container.innerHTML = "";
+
       if (!res.ok) {
         showToast(result.message, "error");
-        output.textContent = "";
-      } else {
-        output.textContent = JSON.stringify(result, null, 2);
-        showToast("Assignments fetched!", "success");
+        return;
       }
+
+      result.forEach(assign => {
+        const card = document.createElement("div");
+        card.className = "result-card";
+        card.innerHTML = `
+          <h3>Assignment</h3>
+          <p><strong>User ID:</strong> ${assign.userId}</p>
+          <p><strong>Event ID:</strong> ${assign.eventId}</p>
+        `;
+        container.appendChild(card);
+      });
+      showToast("Assignments fetched!", "success");
     };
 
     document.getElementById("get-event-assignments-form").onsubmit = async (e) => {
@@ -115,14 +133,25 @@
       const eventId = e.target.eventId.value;
       const res = await fetch(`${API_URL}/assignments/event/${eventId}`);
       const result = await res.json();
-      const output = document.getElementById("event-assignments-result");
+      const container = document.getElementById("event-assignments-result");
+      container.innerHTML = "";
+
       if (!res.ok) {
         showToast(result.message, "error");
-        output.textContent = "";
-      } else {
-        output.textContent = JSON.stringify(result, null, 2);
-        showToast("Assignments fetched!", "success");
+        return;
       }
+
+      result.forEach(assign => {
+        const card = document.createElement("div");
+        card.className = "result-card";
+        card.innerHTML = `
+          <h3>Assignment</h3>
+          <p><strong>User ID:</strong> ${assign.userId}</p>
+          <p><strong>Event ID:</strong> ${assign.eventId}</p>
+        `;
+        container.appendChild(card);
+      });
+      showToast("Assignments fetched!", "success");
     };
 
     document.getElementById("delete-assignment-form").onsubmit = async (e) => {

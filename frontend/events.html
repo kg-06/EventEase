@@ -6,6 +6,12 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
+  <div class="bg-animation">
+        <div id="stars"></div>
+        <div id="stars2"></div>
+        <div id="stars3"></div>
+        <div id="stars4"></div>
+  </div>
   <header>
     <h1>Event Management</h1>
   </header>
@@ -16,7 +22,7 @@
     <a href="events.html">Events</a>
     <a href="assignments.html">Assignments</a>
   </nav>
-
+    
     <div class="cards-grid">
       <div class="card" onclick="openPopup('add-event-popup')">➕ Add Event</div>
       <div class="card" onclick="openPopup('update-event-popup')">✏️ Update Event</div>
@@ -58,7 +64,7 @@
         <input type="text" name="id" placeholder="Event ID" required />
         <button type="submit">Get</button>
       </form>
-      <pre id="event-result"></pre>
+      <div id="event-result-card" class="event-card"></div>
     </div>
   </div>
 
@@ -124,14 +130,24 @@
       const id = e.target.id.value;
       const res = await fetch(`${API_URL}/events/${id}`);
       const result = await res.json();
-      const output = document.getElementById("event-result");
-      if (!res.ok) {
-        showToast(result.message, "error");
-        output.textContent = "";
-      } else {
-        output.textContent = JSON.stringify(result.data, null, 2);
-        showToast("Event fetched!", "success");
-      }
+      const cardContainer = document.getElementById("event-result-card");
+cardContainer.innerHTML = "";
+
+if (!res.ok) {
+  showToast(result.message, "error");
+} else {
+  const { id, name, date } = result.data;
+  const cardHTML = `
+    <div class="result-card">
+      <h3>${name}</h3>
+      <p><strong>ID:</strong> ${id}</p>
+      <p><strong>Date:</strong> ${date}</p>
+    </div>
+  `;
+  cardContainer.innerHTML = cardHTML;
+  showToast("Event fetched!", "success");
+}
+
     };
 
     document.getElementById("delete-event-form").onsubmit = async (e) => {

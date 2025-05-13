@@ -6,6 +6,12 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
+  <div class="bg-animation">
+        <div id="stars"></div>
+        <div id="stars2"></div>
+        <div id="stars3"></div>
+        <div id="stars4"></div>
+    </div>
   <header>
     <h1>Organizer Management</h1>
   </header>
@@ -16,7 +22,7 @@
     <a href="events.html">Events</a>
     <a href="assignments.html">Assignments</a>
   </nav>
-
+ 
     <div class="cards-grid">
       <div class="card" onclick="openPopup('add-user-popup')">➕ Add Organizer</div>
       <div class="card" onclick="openPopup('update-user-popup')">✏️ Update Organizer</div>
@@ -58,7 +64,7 @@
         <input type="text" name="id" placeholder="ID" required />
         <button type="submit">Get</button>
       </form>
-      <pre id="user-result"></pre>
+      <div id="user-result-card" class="user-card"></div>
     </div>
   </div>
 
@@ -75,7 +81,7 @@
 
   <script>
     const API_URL = "https://eventease-jnht.onrender.com";
-    
+
     const openPopup = (id) => document.getElementById(id).classList.add("show");
     const closePopup = (id) => document.getElementById(id).classList.remove("show");
 
@@ -116,14 +122,24 @@
       const id = e.target.id.value;
       const res = await fetch(`${API_URL}/users/${id}`);
       const result = await res.json();
-      const output = document.getElementById("user-result");
-      if (!res.ok) {
-        showToast(result.message, "error");
-        output.textContent = "";
-      } else {
-        output.textContent = JSON.stringify(result.data, null, 2);
-        showToast("User fetched!", "success");
-      }
+      const cardContainer = document.getElementById("user-result-card");
+cardContainer.innerHTML = "";
+
+if (!res.ok) {
+  showToast(result.message, "error");
+} else {
+  const { id, name, email } = result.data;
+  const cardHTML = `
+    <div class="result-card">
+      <h3>${name}</h3>
+      <p><strong>ID:</strong> ${id}</p>
+      <p><strong>Email:</strong> ${email}</p>
+    </div>
+  `;
+  cardContainer.innerHTML = cardHTML;
+  showToast("User fetched!", "success");
+}
+
     };
 
     document.getElementById("delete-user-form").onsubmit = async (e) => {
